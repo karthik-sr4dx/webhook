@@ -21,6 +21,11 @@ app.get('/webhook', (req, res) => {
   res.json(userIdBuffer); // Send the buffer as JSON response
 });
 
+
+app.get("/home",(req,res)=>{
+  console.log("hi");
+  res.send("Welcome");
+})
 // Webhook POST endpoint
 app.post('/webhook', (req, res) => {
   const events = req.body.events;
