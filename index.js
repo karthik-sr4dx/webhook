@@ -1,5 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const fs = require('fs');
+const https = require('https');
+const path = require('path');
+
+// Load SSL certificates
+const privateKey = fs.readFileSync(path.resolve(__dirname, 'server.key'), 'utf8');
+const certificate = fs.readFileSync(path.resolve(__dirname, 'server.cert'), 'utf8');
+const credentials = { key: privateKey, cert: certificate };
 
 const app = express();
 app.use(bodyParser.json());
@@ -32,7 +40,8 @@ app.post('/webhook', (req, res) => {
   res.sendStatus(200);
 });
 
-// Start the HTTP server
-app.listen(3000, () => {
-  console.log('Listening on port 3000');
+// Start the HTTPS server
+const httpsServer = https.createServer(credentials, app);
+httpsServer.listen(3000, () => {
+  console.log('Listening on port 3000 with HTTPS');
 });

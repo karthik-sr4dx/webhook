@@ -62,9 +62,9 @@ node_modules/
 *.sw?
 
 # SSL Certificates
-*.pem
-*.key
-*.cert
+# *.pem
+# *.key
+# *.cert
 
 # MacOS system files
 .DS_Store
