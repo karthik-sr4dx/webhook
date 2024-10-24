@@ -40,6 +40,11 @@ app.post('/webhook', (req, res) => {
   res.sendStatus(200);
 });
 
+app.get("/home",(req,res)=>{
+  console.log("Hi");
+  res.send("Welcome");
+})
+
 // Start the HTTPS server
 const httpsPort = process.env.PORT || 3000; // Use PORT environment variable
 const httpsServer = https.createServer(credentials, app);
