@@ -21,11 +21,6 @@ app.get('/webhook', (req, res) => {
   res.json(userIdBuffer); // Send the buffer as JSON response
 });
 
-
-app.get("/home",(req,res)=>{
-  console.log("hi");
-  res.send("Welcome");
-})
 // Webhook POST endpoint
 app.post('/webhook', (req, res) => {
   const events = req.body.events;
@@ -46,7 +41,8 @@ app.post('/webhook', (req, res) => {
 });
 
 // Start the HTTPS server
+const httpsPort = process.env.PORT || 3000; // Use PORT environment variable
 const httpsServer = https.createServer(credentials, app);
-httpsServer.listen(3000, () => {
-  console.log('Listening on port 3000 with HTTPS');
+httpsServer.listen(httpsPort, () => {
+  console.log(`Listening on port ${httpsPort} with HTTPS`);
 });
