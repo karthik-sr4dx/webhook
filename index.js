@@ -1,11 +1,69 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const axios = require('axios');
 
 const app = express();
 app.use(bodyParser.json());
 
 // Buffer to store user IDs
 let userIdBuffer = [];
+
+// Function to send messages to users
+async function sendMessage(
+  messageText, 
+  accessToken, 
+  channelSecret, // Currently not used, but kept for future flexibility
+  channelID // Currently not used, but kept for future flexibility
+) {
+  try {
+    console.log(accessToken);
+    const response = await axios.post(
+      'https://api.line.me/v2/bot/message/broadcast',
+      {
+        messages: [
+          {
+            type: 'text',
+            text: messageText,
+          },
+        ],
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        timeout: 20000,
+      }
+    );
+
+    console.log('Message sent successfully', response.data);
+  } catch (error) {
+    console.error('Failed to send message', error.message);
+    console.error('Failed to send message', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      config: error.config,
+    });
+    throw error;
+  }
+}
+
+// POST API endpoint for sending messages
+app.post('/send-message', async (req, res) => {
+  const { messageText, accessToken, channelSecret, channelID } = req.body;
+
+  if (!messageText || !accessToken) {
+    return res.status(400).json({ error: 'messageText and accessToken are required' });
+  }
+
+  try {
+    await sendMessage(messageText, accessToken, channelSecret, channelID);
+    res.status(200).json({ success: 'Message sent successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to send message', details: error.message });
+  }
+});
 
 // Webhook GET endpoint - returns user IDs in buffer
 app.get('/webhook', (req, res) => {
@@ -14,10 +72,10 @@ app.get('/webhook', (req, res) => {
 });
 
 // Webhook POST endpoint
-app.post('/webhook', (req, res) => {
+app.post('/webhook', async (req, res) => {
   const events = req.body.events;
 
-  events.forEach(event => {
+  for (const event of events) {
     if (event.type === 'message' && event.source.type === 'user') {
       const userId = event.source.userId;
       console.log('LINE User ID:', userId);
@@ -26,8 +84,12 @@ app.post('/webhook', (req, res) => {
       if (!userIdBuffer.includes(userId)) {
         userIdBuffer.push(userId);
       }
+
+      // Example of sending a response message to the user
+      const accessToken = 'YOUR_ACCESS_TOKEN'; // Replace with your actual access token
+      await sendMessage(`Hello, user ${userId}!`, accessToken, null, null);
     }
-  });
+  }
 
   res.sendStatus(200);
 });
