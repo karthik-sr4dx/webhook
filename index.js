@@ -11,12 +11,9 @@ let userIdBuffer = [];
 // Function to send messages to users
 async function sendMessage(
   messageText, 
-  accessToken, 
-  channelSecret, // Currently not used, but kept for future flexibility
-  channelID // Currently not used, but kept for future flexibility
+  accessToken // Removed unused parameters for simplicity
 ) {
   try {
-    console.log(accessToken);
     const response = await axios.post(
       'https://api.line.me/v2/bot/message/broadcast',
       {
@@ -38,7 +35,6 @@ async function sendMessage(
 
     console.log('Message sent successfully', response.data);
   } catch (error) {
-    console.error('Failed to send message', error.message);
     console.error('Failed to send message', {
       message: error.message,
       code: error.code,
@@ -50,15 +46,15 @@ async function sendMessage(
 }
 
 // POST API endpoint for sending messages
-app.post('/send-message', async (req, res) => {
-  const { messageText, accessToken, channelSecret, channelID } = req.body;
+app.post('/sendMessage', async (req, res) => {
+  const { messageText, accessToken } = req.body;
 
   if (!messageText || !accessToken) {
     return res.status(400).json({ error: 'messageText and accessToken are required' });
   }
 
   try {
-    await sendMessage(messageText, accessToken, channelSecret, channelID);
+    await sendMessage(messageText, accessToken);
     res.status(200).json({ success: 'Message sent successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to send message', details: error.message });
@@ -87,7 +83,7 @@ app.post('/webhook', async (req, res) => {
 
       // Example of sending a response message to the user
       const accessToken = 'YOUR_ACCESS_TOKEN'; // Replace with your actual access token
-      await sendMessage(`Hello, user ${userId}!`, accessToken, null, null);
+      await sendMessage(`Hello, user ${userId}!`, accessToken);
     }
   }
 
@@ -97,6 +93,11 @@ app.post('/webhook', async (req, res) => {
 // Simple route for testing
 app.get("/home", (req, res) => {
   console.log("Hi");
+  res.send("Welcome");
+});
+
+app.get("/sendMessage", (req, res) => {
+  console.log("Msg");
   res.send("Welcome");
 });
 
