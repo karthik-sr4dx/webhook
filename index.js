@@ -67,27 +67,20 @@ app.get('/webhook', (req, res) => {
   res.json(userIdBuffer); // Send the buffer as JSON response
 });
 
-// Webhook POST endpoint
-app.post('/webhook', async (req, res) => {
+app.post('/webhook', (req, res) => {
+  res.sendStatus(200); // Respond early to LINE
   const events = req.body.events;
-
-  for (const event of events) {
+  events.forEach(async (event) => {
     if (event.type === 'message' && event.source.type === 'user') {
       const userId = event.source.userId;
       console.log('LINE User ID:', userId);
-
-      // Add the userId to the buffer
       if (!userIdBuffer.includes(userId)) {
         userIdBuffer.push(userId);
       }
-
-      // Example of sending a response message to the user
-      const accessToken = 'YOUR_ACCESS_TOKEN'; // Replace with your actual access token
+      const accessToken = process.env.LINE_ACCESS_TOKEN; 
       await sendMessage(`Hello, user ${userId}!`, accessToken);
     }
-  }
-
-  res.sendStatus(200);
+  });
 });
 
 // Simple route for testing
